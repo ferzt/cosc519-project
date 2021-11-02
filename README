@@ -1,0 +1,28 @@
+==========================================================================
+Names:      Aviel Cohen, Angela Gurfolino, Dylan Van Meer
+Date:       14 - 05 - 2019
+Assignment: Group Project
+==========================================================================
+
+Build Instructions: Makefile included
+
+Run Instructions:
+ USAGE: java Main "{ first | best | next | worst }" "{ first | best | next | worst }"
+
+Submitted Files:
+ - Main.java: 
+     Main entry point for simulator.
+ - Externals.java:
+     Contains commonly-used constants and functions
+ - Process.java: 
+     Models a process in memory
+ - MemorySimulatorBase.java: 
+     Contains functionality shared by all memory management strategies
+ - FirstFitMemorySimulator.java:
+     Employs a first-fit memory management strategy
+ - BestFitMemorySimulator.java
+     Employs a best-fit memory management strategy
+ - NextFitMemorySimulator.java
+     Employs a next-fit memory management strategy
+ - WorstFitMemorySimulator.java
+     Employs a worst-fit memory management strategy
