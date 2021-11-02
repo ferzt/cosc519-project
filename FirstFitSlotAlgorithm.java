@@ -4,20 +4,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Memory strategy that puts a process in memory at the
  * first location available in memory
  */
-public class FirstFitMemorySimulator extends MemorySimulatorBase {
-
-	/**
-	 * Default constructor that initializes the sim 
-	 * 
-	 */
-	public FirstFitMemorySimulator() {
-		super();
+public class FirstFitSlotAlgorithm extends SlotAlgorithmBase {
+	
+	public FirstFitSlotAlgorithm(MemorySimulator insim) {
+		super(insim);
 	}
 	
-	public FirstFitMemorySimulator(char [] mem, CopyOnWriteArrayList<Process> processes ) {
-		super( mem, processes );
-	}
-
+	
 	/**
 	 * Return the index of the first position of the next available slot
 	 * in memory
@@ -29,12 +22,10 @@ public class FirstFitMemorySimulator extends MemorySimulatorBase {
 		int blocksize = 0;
 		
 		int i;
-		for(i = 0; i < main_memory.length - slotSize; i++)
-		{
-			if(main_memory[i] == FREE_MEMORY && blocksize < slotSize)
+		for(i = 0; i < sim.main_memory.length - slotSize; i++) {
+			if (sim.main_memory[i] == MemorySimulator.FREE_MEMORY && blocksize < slotSize)
 				blocksize++;
-			else
-			{
+			else {
 				if(blocksize >= slotSize)
 					return i - blocksize;
 				blocksize = 0;

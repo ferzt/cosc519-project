@@ -4,20 +4,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Memory strategy that puts a process in memory at the next fitting location
  * in memory.
  */
-public class NextFitMemorySimulator extends MemorySimulatorBase {
-
-	/**
-	 * Default constructor that initializes the sim
-	 * 
-	 */
-	public NextFitMemorySimulator() {
-		super();
+public class NextFitSlotAlgorithm extends SlotAlgorithmBase {
+	
+	public NextFitSlotAlgorithm(MemorySimulator insim) {
+		super(insim);
 	}
 	
-	public NextFitMemorySimulator(char [] mem, CopyOnWriteArrayList<Process> processes ) {
-		super( mem, processes );
-	}
-
 	/**
 	 * Return the index of the first position of the next available slot
 	 * in memory
@@ -27,8 +19,8 @@ public class NextFitMemorySimulator extends MemorySimulatorBase {
 	@Override
 	protected int getNextSlot(int slotSize) {
 		int spaceAvailable = 0;
-		for (int i = main_memory.length-1; i >=0; i--) {
-			if (main_memory[i] == FREE_MEMORY) {
+		for (int i = sim.main_memory.length-1; i >=0; i--) {
+			if (sim.main_memory[i] == MemorySimulator.FREE_MEMORY) {
 				spaceAvailable++;
 			} else {
 				if (spaceAvailable < slotSize) {
