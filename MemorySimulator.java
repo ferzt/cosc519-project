@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
  */
 
-public abstract class MemorySimulatorBase {
+public class MemorySimulator {
 	
 	//change to either 1024 or 400
 	private static final int MemSize = 400;
@@ -30,8 +30,10 @@ public abstract class MemorySimulatorBase {
 	private int timeAdded;
 	
 	protected CopyOnWriteArrayList<Process> copy = new CopyOnWriteArrayList<Process>();
-
-	public MemorySimulatorBase() {
+	
+	public SlotAlgorithmBase slotAlgorithm;
+	
+	public MemorySimulator() {
 		
 		Random rand = new Random();
 
@@ -72,7 +74,7 @@ public abstract class MemorySimulatorBase {
 		}
 	}
 	
-	public MemorySimulatorBase(char [] mem, CopyOnWriteArrayList<Process> processes ) {
+	public MemorySimulator(char [] mem, CopyOnWriteArrayList<Process> processes ) {
 		
 		for(Process p : processes) {
 			this.processes.add(p);
@@ -87,18 +89,30 @@ public abstract class MemorySimulatorBase {
 		}
 	}
 	
-	/**
-	 * Return the index of the first position of the next available slot
-	 * in memory
-	 * 
-	 * Different memory strategy classes must override this abstract method.
-	 * @param slotSize The size of the requested slot
-	 * @return The index of the first position of an available requested block
-	 */
-	protected abstract int getNextSlot(int slotSize);
+	public void setSlotAlgorithm(String type) {
+		switch (type) {
+			case "first":
+				slotAlgorithm = new FirstFitSlotAlgorithm(this);
+				break;
+			case "next":
+				slotAlgorithm = new NextFitSlotAlgorithm(this);
+				break;
+			case "best":
+				slotAlgorithm = new BestFitSlotAlgorithm(this);
+				break;
+			case "worst":
+				slotAlgorithm = new WorstFitSlotAlgorithm(this);
+				break;
+			default:
+				Externals.invalidUsageExit();
+		}
+	}
 	
-
-	// This is the wait functionality that I added.
+	
+	/**
+	 * This is the wait functionality that someone added, apparently
+	 * @param t
+	 */
 	public void wait(int t) {
 		
 		boolean remove = false;
@@ -217,19 +231,19 @@ public abstract class MemorySimulatorBase {
 	 */
 	protected void putInMemory(Process p) {
 
-		int targetSlot = getNextSlot(p.getSize());
+		int targetSlot = slotAlgorithm.getNextSlot(p.getSize());
 
 		if (targetSlot == -1) {
 			
 			defragment();
 			printMemory();
-			targetSlot = getNextSlot(p.getSize());
+			targetSlot = slotAlgorithm.getNextSlot(p.getSize());
 			int count = CURRENT_TIME ;
 			
 			while( targetSlot == -1) {
 				wait(count++);
 				
-				targetSlot = getNextSlot(p.getSize());
+				targetSlot = slotAlgorithm.getNextSlot(p.getSize());
 				if(CURRENT_TIME > 50000 ) {
 					Externals.endOfSimulation();
 				}

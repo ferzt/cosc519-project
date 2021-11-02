@@ -4,18 +4,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Memory strategy that puts a process in memory at a location which best
  * fits the amount of memory requested.
  */
-public class BestFitMemorySimulator extends MemorySimulatorBase {
+public class BestFitSlotAlgorithm extends SlotAlgorithmBase {
 	
-	/**
-	 * Default constructor that initializes the sim
-	 * 
-	 */
-	public BestFitMemorySimulator() {
-		super();
-	}
-	
-	public BestFitMemorySimulator(char [] mem, CopyOnWriteArrayList<Process> processes ) {
-		super( mem, processes );
+	public BestFitSlotAlgorithm(MemorySimulator insim) {
+		super(insim);
 	}
 
 	/**
@@ -32,8 +24,8 @@ public class BestFitMemorySimulator extends MemorySimulatorBase {
 		int current_start = -1;
 		int current_size = 0;
 		
-		for (int i = 0; i < main_memory.length; i++) {
-			if (main_memory[i] == FREE_MEMORY) {
+		for (int i = 0; i < sim.main_memory.length; i++) {
+			if (sim.main_memory[i] == sim.FREE_MEMORY) {
 				if (current_size == 0) {
 					current_start = i;
 				}

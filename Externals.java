@@ -10,7 +10,7 @@ public class Externals {
 	 * Prints error message and exits.
 	 */
 	public static void invalidUsageExit() {
-		System.err.println("USAGE: java Main { first | best | next | worst } { first | best | next | worst }");
+		System.err.println("USAGE: java Main { first | best | next | worst }");
 		System.exit(1);
 	}
 	
