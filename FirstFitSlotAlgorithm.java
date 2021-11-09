@@ -22,11 +22,11 @@ public class FirstFitSlotAlgorithm extends SlotAlgorithmBase {
 		int blocksize = 0;
 		
 		int i;
-		for(i = 0; i < sim.main_memory.length - slotSize; i++) {
-			if (sim.main_memory[i] == MemorySimulator.FREE_MEMORY && blocksize < slotSize)
+		for(i = 0; i < sim.mainMemory.length - slotSize; i++) {
+			if (sim.isMemoryFreeAt(i) && blocksize < slotSize)
 				blocksize++;
 			else {
-				if(blocksize >= slotSize)
+				if (blocksize >= slotSize)
 					return i - blocksize;
 				blocksize = 0;
 			}

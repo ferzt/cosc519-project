@@ -4,11 +4,15 @@
  * Represent a process that uses memory
  */
 public class Process implements Comparable<Process> {
-	private char pid;
+	public static final String PROC_NAMES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	
+	private int pid;
+	protected char pname;
 	private int size;
-	private int start_time;
-	private int end_time;
-	private int timeAdded;
+	private int duration;
+	
+	private int timeAdded = -1;
+	private int memoryLocation = -1;
 
 	/**
 	 * Default constructor
@@ -17,20 +21,28 @@ public class Process implements Comparable<Process> {
 	 * @param start_time The virtual time the process enters memory
 	 * @param end_time The virtual time the process leaves memory
 	 */
-	public Process(char pid, int size, int start_time, int end_time) {
-		this.pid 			= pid;
-		this.size 			= size;
-		this.start_time 	= start_time;
-		this.end_time 		= end_time;
-		this.timeAdded      = start_time;
+	public Process(int pid, int size, int duration) {
+		this.pid = pid;
+		if (pid >= 0)
+			this.pname = PROC_NAMES.charAt(pid % PROC_NAMES.length());
+		this.size = size;
+		this.duration = duration;
 	}
-
+	
 	/**
 	 * Get the PID of the process
 	 * @return The PID of the process
 	 */
-	public char getPid() {
+	public int getPid() {
 		return pid;
+	}
+	
+	/**
+	 * Get the single-character name of the process
+	 * @return The single-character name of the process
+	 */
+	public char getPname() {
+		return pname;
 	}
 
 	/**
@@ -40,51 +52,36 @@ public class Process implements Comparable<Process> {
 	public int getSize() {
 		return size;
 	}
-
-	/**
-	 * Get the virtual time at which the process enters memory
-	 * @return The virtual time at which the process enters memory
-	 */
-	public int getStartTime() {
-		return start_time;
-	}
-	
-	public void setTimeAdded(int added) {
-		this.timeAdded = added;
-	}
 	
 	public int getTimeAdded() {
 		return timeAdded;
 	}
 	
-	
-	// added getting units the process needs to be in memory
-	
-	public int getTimeInMemory() {
-		
-		return (end_time - start_time);
-	}
-
 	/**
 	 * Compare this process with another process by start time
 	 * @param o The other process
 	 */
 	@Override
 	public int compareTo(Process o) {
-		if (this.start_time < o.start_time) {
-			return -1;
-		} else if (this.start_time == o.start_time) {
-			return 0;
-		} else {
-			return 1;
-		}		
+		return Integer.compare(this.timeAdded, o.timeAdded);
 	}
 	
 	public boolean samePid(Process o) {
-		if (this.pid == o.pid)
-			return true;
-		else
-			return false;		
+		return this.pid == o.pid;
+	}
+
+	public void placeIn(int time, int slot) {
+		timeAdded = time;
+		memoryLocation = slot;
+	}
+
+	public void setLocation(int destination) {
+		memoryLocation = destination;
+	}
+
+	public boolean isItTimeToGo(int simTime) {
+		System.out.println(pname + ": is " + simTime + ", should remove at " + (timeAdded + duration));
+		return simTime >= timeAdded + duration;
 	}
 	
 }
