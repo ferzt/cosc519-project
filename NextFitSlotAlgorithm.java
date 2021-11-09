@@ -19,8 +19,8 @@ public class NextFitSlotAlgorithm extends SlotAlgorithmBase {
 	@Override
 	protected int getNextSlot(int slotSize) {
 		int spaceAvailable = 0;
-		for (int i = sim.main_memory.length-1; i >=0; i--) {
-			if (sim.main_memory[i] == MemorySimulator.FREE_MEMORY) {
+		for (int i = sim.mainMemory.length-1; i >=0; i--) {
+			if (sim.isMemoryFreeAt(i)) {
 				spaceAvailable++;
 			} else {
 				if (spaceAvailable < slotSize) {

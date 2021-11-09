@@ -5,9 +5,6 @@
  *
  */
 public class Main {
-	
-	static int TIME;
-	
 	public static void main( String[] args ) {
 		if (args.length != 1) {
 			Externals.invalidUsageExit();
@@ -16,15 +13,14 @@ public class Main {
 		String simName = args[0].trim();
 		MemorySimulator sim = new MemorySimulator();
 		sim.setSlotAlgorithm(simName);
-	
-		sim.timeStepUntil(0);
-		sim.printMemory();
-	
-		int count1 = 0;
-		while (sim.processesRemaining() != 0) {
-			sim.timeStepUntil(count1++);
+		while (true) {
+			sim.timeStep();
+			sim.printMemory();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				
+			}
 		}
-		
-		System.out.println("No more events to process... ending this simulation!");
 	}
 }

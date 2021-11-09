@@ -24,8 +24,8 @@ public class BestFitSlotAlgorithm extends SlotAlgorithmBase {
 		int current_start = -1;
 		int current_size = 0;
 		
-		for (int i = 0; i < sim.main_memory.length; i++) {
-			if (sim.main_memory[i] == sim.FREE_MEMORY) {
+		for (int i = 0; i < sim.mainMemory.length; i++) {
+			if (sim.isMemoryFreeAt(i)) {
 				if (current_size == 0) {
 					current_start = i;
 				}
