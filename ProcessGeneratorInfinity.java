@@ -8,7 +8,8 @@ import java.util.Random;
 public class ProcessGeneratorInfinity {
 	private int index;
 	private Random rand;
-	
+	public static final int MAX_SIZE = 48;
+	public static final int MAX_DURATION = 16;
 	
 	public ProcessGeneratorInfinity() {
 		index = 0;
@@ -16,7 +17,7 @@ public class ProcessGeneratorInfinity {
 	}
 	
 	public Process getNextProcess() {
-		Process proc = new Process(index, rand.nextInt(32)+1, rand.nextInt(8)+1);
+		Process proc = new Process(index, rand.nextInt(MAX_SIZE)+1, rand.nextInt(MAX_DURATION)+1);
 		index++;
 		return proc;
 	}

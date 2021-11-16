@@ -15,7 +15,7 @@ public class Main {
 		sim.setSlotAlgorithm(simName);
 		while (true) {
 			sim.timeStep();
-			sim.printMemory();
+			sim.printStuff();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
