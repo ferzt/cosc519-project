@@ -15,10 +15,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MemorySimulator {
 	
 	//change to either 1024 or 400
-	private static final int MemSize = 400;
-	
-	protected static final char FREE_MEMORY = '.';
-	protected static final char RESERVED_MEMORY = '#';
+	private int memorySize = 400;
+	private static final int RESERVED_SIZE = 50;
+	public static final int PRINT_PER_LINE = 100;
 	
 	protected ProcessGeneratorInfinity procgen;//TODO move this elsewhere
 	protected int currentTime = -1;
@@ -35,7 +34,7 @@ public class MemorySimulator {
 	public SlotAlgorithmBase slotAlgorithm;
 	
 	public MemorySimulator() {
-		mainMemory = new Process[MemSize];
+		mainMemory = new Process[memorySize];
 		procgen = new ProcessGeneratorInfinity();
 		initializeMainMemory();
 	}
@@ -67,7 +66,7 @@ public class MemorySimulator {
 		
 		//debugPrintln("=========== Time IS NOW " + currentTime + " ============");
 		
-		int removed = removeDoneProcesses();
+		removeDoneProcesses();
 		
 		addNextProcess();
 		
@@ -145,17 +144,22 @@ public class MemorySimulator {
 		for (int i = 80; i < mainMemory.length; i++) {
 			mainMemory[i] = null;
 		}
-		putInMemoryAt(new ProcessReserve(80), 0);
+		putInMemoryAt(new ProcessReserve(RESERVED_SIZE), 0);
 	}
-
+	
+	public void printStuff() {
+		System.out.println("The time is now "+currentTime);
+		printMemory();
+	}
+	
 	/**
 	 * Print the current contents of memory
 	 */
 	public void printMemory() {
-		System.out.print("Memory at time " + currentTime + ":");
+		//System.out.print("Memory at time " + currentTime + ":");
 		
 		for (int i = 0; i < mainMemory.length; i++) {
-			if (i % 80 == 0) {
+			if (i > 0 && i % PRINT_PER_LINE == 0) {
 				System.out.println("");
 			}
 			System.out.print((mainMemory[i] == null ? '.' : mainMemory[i].getPname()) + "");
@@ -172,16 +176,20 @@ public class MemorySimulator {
 		printMemory();
 
 		System.out.println("Performing defragmentation...");
-		int destination = 80;
+		int destination = 0;
 		Process lastMoved = null;
 		for (int i = 0; i < mainMemory.length; i++) {
-			if (isMemoryFreeAt(i) && i != destination) {
+			if (!isMemoryFreeAt(i) && i != destination) {
 				if (lastMoved != mainMemory[i]) {
 					lastMoved = mainMemory[i];
 					lastMoved.setLocation(destination);
 				}
 				mainMemory[destination] = mainMemory[i];
-				mainMemory[i] = null; 
+				mainMemory[i] = null;
+			}
+			System.out.println("i="+i+", destination="+destination);
+			printMemory();
+			if (!isMemoryFreeAt(destination) && destination <= i) {
 				destination++;
 			}
 		}
@@ -192,6 +200,7 @@ public class MemorySimulator {
 		System.out.println("Relocated some processes " +
 				"to create a free memory block of " + freeBlockSize + " units " +
 				"(" + f.format(percentage * 100) + "% of total memory).");
+		//Externals.outOfMemoryExit();
 	}
 	
 	public boolean isMemoryFreeAt(int index) {
