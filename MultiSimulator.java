@@ -32,7 +32,7 @@ public class MultiSimulator {
 	
 	public void addProcessToAll(Process p) {
 		for (MemorySimulator simp : sims) {
-			simp.addNewProcess(p);
+			simp.addNewProcess(new Process(p));
 		}
 	}
 
