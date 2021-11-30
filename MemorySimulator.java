@@ -19,12 +19,13 @@ public class MemorySimulator {
 	private static final int RESERVED_SIZE = 50;
 	public static final int PRINT_PER_LINE = 100;
 	
-	protected ProcessGeneratorInfinity procgen;//TODO move this elsewhere
 	protected int currentTime = -1;
-	protected Process starved = null;
 	protected Process[] mainMemory;
-
+	
+	/** Processes that are currently in memory. */
 	protected ArrayList<Process> processes = new ArrayList<Process>();
+	/** Processes that are waiting on the disk. */
+	protected ArrayList<Process> diskQueue = new ArrayList<Process>();
 
 	// must leave MEMSIM_DEBUG to true
 	protected static final boolean MEMSIM_DEBUG = true;
@@ -35,7 +36,6 @@ public class MemorySimulator {
 	
 	public MemorySimulator() {
 		mainMemory = new Process[memorySize];
-		procgen = new ProcessGeneratorInfinity();
 		initializeMainMemory();
 	}
 	
@@ -66,11 +66,32 @@ public class MemorySimulator {
 		
 		//debugPrintln("=========== Time IS NOW " + currentTime + " ============");
 		
+		addQueuedProcesses();
+		
+		workOnProcesses();
+		
 		removeDoneProcesses();
 		
-		addNextProcess();
+		//addNextProcess();
 		
 		//printMemory();
+	}
+	
+	/**
+	 * Inserts a new process into the simulation.
+	 * @param p
+	 */
+	public void addNewProcess(Process p) {
+		diskQueue.add(p);
+	}
+	
+	/**
+	 * Works on all processes that are in memory.
+	 */
+	protected void workOnProcesses() {
+		for (Process p : processes) {
+			p.doWork();
+		}
 	}
 	
 	protected int removeDoneProcesses() {
@@ -96,14 +117,21 @@ public class MemorySimulator {
 		processes.remove(p);
 	}
 	
-	protected void addNextProcess() {
-		Process p;
+	/**
+	 * Adds processes from diskQueue until there are none left, or one is too large to insert.
+	 */
+	protected void addQueuedProcesses() {
+		boolean got = true;
+		while (!diskQueue.isEmpty() && got) {
+			got = putInMemory(diskQueue.remove(0));
+		}
+		/*Process p;
 		if (starved != null)
 			p = starved;
 		else
 			p = procgen.getNextProcess();
 		if (!putInMemory(p))
-			starved = p;
+			starved = p;*/
 	}
 	
 	/**

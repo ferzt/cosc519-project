@@ -10,23 +10,37 @@ public class Process implements Comparable<Process> {
 	protected char pname;
 	private int size;
 	private int duration;
+	private int durationLeft;
 	
 	private int timeAdded = -1;
 	private int memoryLocation = -1;
-
-	/**
-	 * Default constructor
-	 * @param pid The ASCII identifier of the new process
-	 * @param size The amount of memory the process uses
-	 * @param start_time The virtual time the process enters memory
-	 * @param end_time The virtual time the process leaves memory
-	 */
+	
 	public Process(int pid, int size, int duration) {
 		this.pid = pid;
 		if (pid >= 0)
 			this.pname = PROC_NAMES.charAt(pid % PROC_NAMES.length());
 		this.size = size;
 		this.duration = duration;
+		this.durationLeft = duration;
+	}
+	
+	/**
+	 * Duplicates most of the attributes of the given Process.
+	 * @param o
+	 */
+	public Process(Process o) {
+		pid = o.pid;
+		pname = o.pname;
+		size = o.size;
+		duration = o.duration;
+		durationLeft = o.durationLeft;
+	}
+	
+	/**
+	 * Works on the process, moving it one step closer to completion.
+	 */
+	public void doWork() {
+		durationLeft--;
 	}
 	
 	/**
@@ -80,8 +94,8 @@ public class Process implements Comparable<Process> {
 	}
 
 	public boolean isItTimeToGo(int simTime) {
-		System.out.println(pname + ": is " + simTime + ", should remove at " + (timeAdded + duration));
-		return simTime >= timeAdded + duration;
+		return durationLeft <= 0;
+		//System.out.println(pname + ": is " + simTime + ", should remove at " + (timeAdded + duration));
+		//return simTime >= timeAdded + duration;
 	}
-	
 }

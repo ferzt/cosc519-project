@@ -1,18 +1,18 @@
 
 
 /**
- * Main class sets up and runs the simulation,
+ * Run this class to test only the simulators, without worrying about the UI.
  *
  */
-public class Main {
+public class ConsoleMain {
 	public static void main( String[] args ) {
-		if (args.length != 1) {
+		/*if (args.length != 1) {
 			Externals.invalidUsageExit();
-		}
+		}*/
 		
-		String simName = args[0].trim();
-		MemorySimulator sim = new MemorySimulator();
-		sim.setSlotAlgorithm(simName);
+		MultiSimulator sim = new MultiSimulator(args.length);
+		sim.setSlotAlgorithms(args);
+		
 		while (true) {
 			sim.timeStep();
 			sim.printStuff();
