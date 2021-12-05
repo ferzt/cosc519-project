@@ -1,3 +1,4 @@
+package memorysimulator;
 
 public class ProcessReserve extends Process {
 	ProcessReserve(int size) {

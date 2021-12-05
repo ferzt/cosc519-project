@@ -1,3 +1,4 @@
+package memorysimulator;
 
 
 /**
@@ -97,5 +98,9 @@ public class Process implements Comparable<Process> {
 		return durationLeft <= 0;
 		//System.out.println(pname + ": is " + simTime + ", should remove at " + (timeAdded + duration));
 		//return simTime >= timeAdded + duration;
+	}
+	
+	public int getLocation() {
+		return memoryLocation;
 	}
 }

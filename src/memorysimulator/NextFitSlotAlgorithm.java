@@ -1,3 +1,4 @@
+package memorysimulator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**

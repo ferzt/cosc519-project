@@ -1,3 +1,4 @@
+package memorysimulator;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,9 +16,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MemorySimulator {
 	
 	//change to either 1024 or 400
-	private int memorySize = 400;
-	private static final int RESERVED_SIZE = 50;
-	public static final int PRINT_PER_LINE = 100;
+	private static final int memorySize = 400;
+	
+	protected static final char FREE_MEMORY = '.';
+	protected static final char RESERVED_MEMORY = '#';
+	
+	public String algorithmName;
 	
 	protected int currentTime = -1;
 	protected Process[] mainMemory;
@@ -26,6 +30,8 @@ public class MemorySimulator {
 	protected ArrayList<Process> processes = new ArrayList<Process>();
 	/** Processes that are waiting on the disk. */
 	protected ArrayList<Process> diskQueue = new ArrayList<Process>();
+	
+	protected ArrayList<Process> processesDone = new ArrayList<Process>();
 
 	// must leave MEMSIM_DEBUG to true
 	protected static final boolean MEMSIM_DEBUG = true;
@@ -56,6 +62,7 @@ public class MemorySimulator {
 			default:
 				Externals.invalidUsageExit();
 		}
+		algorithmName = type;
 	}
 	
 	/**
@@ -97,14 +104,16 @@ public class MemorySimulator {
 	protected int removeDoneProcesses() {
 		ArrayList<Process> toRemove = new ArrayList<Process>();
 		for (Process p : processes) {
-			//System.out.println("i was wondering why so many of the radical left participate in speedrunning");
+
 			if (p.isItTimeToGo(currentTime)) {
 				toRemove.add(p);
 			}
 		}
+		processesDone = toRemove;
 		for (Process p : toRemove) {
 			removeProcess(p);
 		}
+		
 		return toRemove.size();
 	}
 	
@@ -172,22 +181,17 @@ public class MemorySimulator {
 		for (int i = 80; i < mainMemory.length; i++) {
 			mainMemory[i] = null;
 		}
-		putInMemoryAt(new ProcessReserve(RESERVED_SIZE), 0);
+		putInMemoryAt(new ProcessReserve(80), 0);
 	}
-	
-	public void printStuff() {
-		System.out.println("The time is now "+currentTime);
-		printMemory();
-	}
-	
+
 	/**
 	 * Print the current contents of memory
 	 */
 	public void printMemory() {
-		//System.out.print("Memory at time " + currentTime + ":");
+		System.out.print("Memory at time " + currentTime + ":");
 		
 		for (int i = 0; i < mainMemory.length; i++) {
-			if (i > 0 && i % PRINT_PER_LINE == 0) {
+			if (i % 80 == 0) {
 				System.out.println("");
 			}
 			System.out.print((mainMemory[i] == null ? '.' : mainMemory[i].getPname()) + "");
@@ -233,5 +237,9 @@ public class MemorySimulator {
 	
 	public boolean isMemoryFreeAt(int index) {
 		return mainMemory[index] == null;
+	}
+	
+	public ArrayList<Process> getProcesses() {
+		return processes;
 	}
 }

@@ -1,3 +1,6 @@
+package memorysimulator;
+
+import java.util.List;
 
 public class MultiSimulator {
 	MemorySimulator[] sims;
@@ -42,6 +45,15 @@ public class MultiSimulator {
 		}
 		for (int i = 0; i < types.length; i++) {
 			sims[i].setSlotAlgorithm(types[i].trim());
+		}
+	}
+	
+	public void setSlotAlgorithms(List<String> types) {
+		if (types.size() != sims.length) {
+			Externals.invalidUsageExit();
+		}
+		for (int i = 0; i < types.size(); i++) {
+			sims[i].setSlotAlgorithm(types.get(i).trim());
 		}
 	}
 	

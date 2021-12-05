@@ -1,3 +1,4 @@
+package memorysimulator;
 
 /**
  * A place for our constants, macros, and helper functions
@@ -25,6 +26,11 @@ public class Externals {
 	
 	public static void endOfSimulation() {
 		System.err.println("end of simulation.");
+		System.exit(1);
+	}
+	
+	public static void uiLibraryUnavailable() {
+		System.err.println("No UI Library found: running in command line");
 		System.exit(1);
 	}
 }

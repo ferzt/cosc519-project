@@ -1,3 +1,4 @@
+package memorysimulator;
 
 public abstract class SlotAlgorithmBase {
 	

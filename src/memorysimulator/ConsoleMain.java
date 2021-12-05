@@ -1,4 +1,4 @@
-
+package memorysimulator;
 
 /**
  * Run this class to test only the simulators, without worrying about the UI.
