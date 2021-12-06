@@ -5,6 +5,7 @@ import java.util.Observable;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.application.Application.Parameters;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -42,19 +43,20 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import memorysimulator.UIStarter.SimulSpeed;
 
 public class UIStarter extends Application {
 	
 	
 	@Override
 	public void start(Stage primaryStage) {
-		try {
+		try {			
 			// Parameter list inputs
 			Parameters params = getParameters();
 			List<String> inputArg = params.getRaw();
+			String[] inputArgUi = new String[inputArg.size()];
 			
-			//Intialize memory slots
-			int memslots = 0;	
+			//Initialize memory slots
 			SimulSpeed simulationSpeed = new SimulSpeed();
 			
 			// Create parent panes
@@ -62,52 +64,38 @@ public class UIStarter extends Application {
 			panemaster.setOrientation(Orientation.VERTICAL);
 			
 			HBox paneTopComponents = new HBox(); // pane for top components - memory area, list of processes, PCB information etc
-			paneTopComponents.setPrefSize(800,600); ///sizing
+			paneTopComponents.setPrefSize(650,600); ///sizing
 			
 			HBox paneCenterComponents = new HBox(); //pane for center - input arg selection and simulation speed control
-			paneCenterComponents.setPrefSize(800,50);
+			paneCenterComponents.setPrefSize(650,50);
 			
-			HBox paneBottomComponents = new HBox(); //pane for bottom component - start/stop/pause buttons
-			paneBottomComponents.setPrefSize(800,150);
+			VBox paneBottomComponents = new VBox(); //pane for bottom component - start/stop/pause buttons
+			paneBottomComponents.setPrefSize(650,150);
+			
+			HBox startStopButtons = new HBox(); //pane for bottom component - start/stop/pause buttons
+			startStopButtons.setPrefSize(650,50);
 		
-			//Panes in top component
-			VBox leftBox = new VBox(); //Queued Processes
-			VBox middleBox = new VBox(); //container for memory area and label
-			
-			FlowPane centerBox = new FlowPane(); //Memory Boxes
-			centerBox.setPrefSize(510, 500);
-			
-			VBox rightBox = new VBox(); //PCB info for both simulations
-			Text text = new Text("Launched");
-			
-			ScrollPane procPane = new ScrollPane();
-			procPane.setPrefSize(150, 500);
-			
-			VBox pcbHolder = new VBox(); // PCB informtaion
-			pcbHolder.setPrefSize(120, 350);
-			
-			VBox systatus = new VBox();
-			systatus.setPrefSize(140, 220);
 			
 			//Panes or Containers in bottom component
 			VBox controlsLeftB = new VBox();
 			VBox controlsRightB = new VBox();
-			controlsLeftB.setPrefSize(400, 200);
-			controlsRightB.setPrefSize(400, 200);
+			controlsLeftB.setPrefSize(325, 50);
+			controlsRightB.setPrefSize(325, 50);
 			
 			
 			// Panes or Containers for center components
 			HBox inputArgs = new HBox();
-			inputArgs.setPrefSize(800, 200);
+			inputArgs.setPrefSize(450, 200);
 			
 			
 			//Create Children Panes
 			BorderPane smallPane = new BorderPane(); //Container for right controls, slider and switch
 			VBox processGen = new VBox(); //container for process generation toggling equivalent to a pause
-			Pane btnSnap = new Pane();// Container for snapshot button - shows analysis at that point in time, make plot
+			BorderPane btnSnap = new BorderPane();// Container for snapshot button - shows analysis at that point in time, make plot
+			btnSnap.setPrefSize(650,100);
 			
 			//Create buttons and components for simulation 
-			Button snapShot = new Button("Snapshot"); // Get analytic snapshot for both running simulations
+			Button snapShot = new Button("VIEW SIMULATOR II"); // Get analytic snapshot for both running simulations
 			Button interrupt = new Button("Interrupt");
 			Slider timeMultiplier = new Slider();
 			
@@ -124,6 +112,8 @@ public class UIStarter extends Application {
 			CheckBox worstFit = new CheckBox("Worst Fit");
 			CheckBox nextFit = new CheckBox("Next Fit");
 			
+			TextArea statusInfo = new TextArea("Status Info:");
+			
 			//Set Padding for checkboxes
 			int checkBoxSize = 5;
 			firstFit.setPadding(new Insets(checkBoxSize,checkBoxSize,checkBoxSize,checkBoxSize));
@@ -135,42 +125,17 @@ public class UIStarter extends Application {
 			Font fontBoldItalic = Font.font("Georgia",FontWeight.BOLD, FontPosture.ITALIC, 12);
 			Font fontBold = Font.font("Georgia", FontWeight.BOLD, FontPosture.REGULAR, 18);
 			
-			Label memLabel = new Label("MEMORY"); //Label for memory area
-			memLabel.setFont(fontBold);
-			Label procQueueLabel = new Label("PROCESSES"); //Label for memory area
-			procQueueLabel.setFont(fontBold);
-			
 			Button startSim = new Button("START");
 			Button stopSim = new Button("STOP"); //Stop Button - becomes visible when start button is pressed
 			
 			ListView<String> procRun = new ListView<String>(); //Listview to hold processes
-			
-			Label pcbInfo = new Label("PCB");
-			pcbInfo.setFont(fontBold);
-			Label pcbBody = new Label("Time, Size");
-			Label pcbTail = new Label("address");
-			
-			TextArea statusInfo = new TextArea("Status Info:");
-			
-			
-			//Create Memory Slots
-			for (memslots = 0; memslots < 400; memslots++) {
-				//Rectangle background with label stacked untop
-				Rectangle memUnit = new Rectangle(0,0,20,20);
-				StackPane memDivUnit = new StackPane();
-				
-				memUnit.setFill(Color.GOLD);
-				memDivUnit.setPadding(new Insets(2));
-				memDivUnit.getChildren().addAll(memUnit, new Label("~"));
-				centerBox.getChildren().addAll(memDivUnit);
-			}
 			
 			//Styling areas (besides memory slots - done above)
 			paneCenterComponents.setStyle("-fx-background-color:lightgray;");
 			paneBottomComponents.setStyle("-fx-background-color:darkgray;");
 			
 			//Set options and initialization for buttons and components
-			snapShot.setMaxWidth(500);
+			snapShot.setMaxWidth(Double.MAX_VALUE);
 			interrupt.setMaxWidth(Double.MAX_VALUE);
 			startSim.setMaxWidth(Double.MAX_VALUE);
 			stopSim.setMaxWidth(Double.MAX_VALUE);
@@ -182,29 +147,36 @@ public class UIStarter extends Application {
 			notPaused.setToggleGroup(pauseSim);
 			notPaused.setSelected(true);
 			
+			//Color buttons
+			startSim.setStyle("-fx-background-color:#32de84;");
+			stopSim.setStyle("-fx-background-color:#de3163;");
+			
 			//Slider for simulation speed
-			timeMultiplier.setOrientation(Orientation.VERTICAL);
+			timeMultiplier.setOrientation(Orientation.HORIZONTAL);
 			timeMultiplier.setShowTickLabels(true);
 			timeMultiplier.setShowTickMarks(true);
 			timeMultiplier.setValue(50);
 			
 			// Putting components into children panes
-			btnSnap.getChildren().add(snapShot);
+			btnSnap.setCenter(snapShot);
 			processGen.getChildren().addAll(cont,shut);
 			smallPane.setCenter(timeMultiplier);
-			pcbHolder.getChildren().addAll(pcbInfo,pcbBody,pcbTail);
 			inputArgs.getChildren().addAll(firstFit,bestFit, worstFit,nextFit);
-			systatus.getChildren().add(statusInfo);
+
 			
 			//Putting children panes into Parent Panes/containers
 			controlsLeftB.getChildren().add(startSim);
 			controlsRightB.getChildren().add(stopSim);
-			leftBox.getChildren().addAll(procQueueLabel, new ScrollPane(procRun), systatus); //interrupt, analysisAllAlgorithms
-			middleBox.getChildren().addAll(memLabel,centerBox, snapShot);
-			rightBox.getChildren().addAll(pcbHolder, smallPane);
-			paneBottomComponents.getChildren().addAll(controlsLeftB,controlsRightB);
-			paneCenterComponents.getChildren().addAll(inputArgs);
-			paneTopComponents.getChildren().addAll(leftBox, middleBox, rightBox);//Left middle and right components into top
+			startStopButtons.getChildren().addAll(controlsLeftB,controlsRightB);
+			paneBottomComponents.getChildren().addAll(startStopButtons, statusInfo, btnSnap);
+			paneCenterComponents.getChildren().addAll(inputArgs, smallPane);
+
+			SimulatorUI myPane = new SimulatorUI();
+			SimulatorUI secondSim = new SimulatorUI();
+			
+			SimulatorUI[] multUI = {myPane, secondSim};
+			
+			paneTopComponents.getChildren().addAll(myPane.mainComponent());
 			
 			//Master pane insertion
 			panemaster.getChildren().addAll(paneTopComponents, paneCenterComponents, paneBottomComponents);// Top and bottom components into panemaster
@@ -233,45 +205,144 @@ public class UIStarter extends Application {
 	            }
 	        };
 	        
-	        EventHandler<ActionEvent> checkBoxInputHandler = new EventHandler<ActionEvent>() {
+	        EventHandler<ActionEvent> checkBoxBestHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
-	            {
-	        		if (bestFit.isSelected() || worstFit.isSelected() || firstFit.isSelected() || nextFit.isSelected()) {
-	        		
-	        		}
-	                
+	            {	  
+    				if(!myPane.argSet && !secondSim.argSet) {
+    					myPane.argSet = true;
+    					myPane.runningAlgo = "best";
+    					bestFit.setDisable(true);
+    				} else {
+    				if(!myPane.argSet || !secondSim.argSet) {
+    					secondSim.argSet = true;
+    					secondSim.runningAlgo = "best";
+    					bestFit.setDisable(true);
+    					firstFit.setDisable(true);
+    					worstFit.setDisable(true);
+    					nextFit.setDisable(true);
+    				}
+    				}
+        			
 	            }
 	        };
+	        
+	        EventHandler<ActionEvent> checkBoxFirstHandler = new EventHandler<ActionEvent>() {
+	        	public void handle(ActionEvent e)
+	            {
+	        		if(!myPane.argSet && !secondSim.argSet) {
+    					myPane.argSet = true;
+    					myPane.runningAlgo = "first";
+    					firstFit.setDisable(true);
+    				} else {
+    				if(!myPane.argSet || !secondSim.argSet) {
+    					secondSim.argSet = true;
+    					secondSim.runningAlgo = "first";
+    					firstFit.setDisable(true);
+    					bestFit.setDisable(true);
+    					worstFit.setDisable(true);
+    					nextFit.setDisable(true);
+    				}
+    				}
+	            }
+	        };
+	        
+	        EventHandler<ActionEvent> checkBoxWorstHandler = new EventHandler<ActionEvent>() {
+	        	public void handle(ActionEvent e)
+	            {      
+	        		if(!myPane.argSet && !secondSim.argSet) {
+    					myPane.argSet = true;
+    					myPane.runningAlgo = "worst";
+    					worstFit.setDisable(true);
+    				} else {
+    				if(!myPane.argSet || !secondSim.argSet) {
+    					secondSim.argSet = true;
+    					secondSim.runningAlgo = "worst";
+    					worstFit.setDisable(true);
+    					firstFit.setDisable(true);
+    					bestFit.setDisable(true);
+    					nextFit.setDisable(true);
+    				}
+    				}
+	            }
+	        };
+	        
+	        EventHandler<ActionEvent> checkBoxNextHandler = new EventHandler<ActionEvent>() {
+	        	public void handle(ActionEvent e)
+	            {
+	        		if(!myPane.argSet && !secondSim.argSet) {
+    					myPane.argSet = true;
+    					myPane.runningAlgo = "next";
+    					nextFit.setDisable(true);
+    				} else {
+    				if(!myPane.argSet || !secondSim.argSet) {
+    					secondSim.argSet = true;
+    					secondSim.runningAlgo = "next";
+    					nextFit.setDisable(true);
+    					firstFit.setDisable(true);
+    					worstFit.setDisable(true);
+    					bestFit.setDisable(true);
+    				}
+    				}
+	            }
+	        };
+	        
+	        snapShot.setOnAction(e -> viewSim(secondSim.mainComponent()));
 	        
 	        timeMultiplier.valueProperty().addListener(ov -> {
 		        simulationSpeed.setSimSpeed(timeMultiplier.getValue() * 2000 / timeMultiplier.getMax());
 	        });
 			
 			//Actions from buttons and other event handlers
-			snapShot.setOnAction(e -> result());
 			startSim.setOnAction(startEvent);
 			stopSim.setOnAction(e -> {
 				shut.setSelected(true);
                 cont.setSelected(false);
+                startSim.setDisable(true);
+				stopSim.setDisable(true);
 			});
 			
-			bestFit.setOnAction(checkBoxInputHandler);
-			worstFit.setOnAction(checkBoxInputHandler);
-			nextFit.setOnAction(checkBoxInputHandler);
-			firstFit.setOnAction(checkBoxInputHandler);
+			bestFit.setOnAction(checkBoxBestHandler);
+			worstFit.setOnAction(checkBoxWorstHandler);
+			nextFit.setOnAction(checkBoxNextHandler);
+			firstFit.setOnAction(checkBoxFirstHandler);
 			
+			//Start out with buttons greyed out
+//						startSim.setDisable(true);
+//						stopSim.setDisable(true);
 			
 			//Create scene and place on stage
-			Scene scene = new Scene(panemaster,800,800);
+			Scene scene = new Scene(panemaster,650,800);
 
 			primaryStage.setTitle("Memory Simulator COSC 519 - GROUP 3"); // Set the stage title
 			primaryStage.setScene(scene); // Place the scene in the stage
 			primaryStage.show(); // Display the stage
-			
-			
+
 			//Create Thread to run simulation
 			Thread simThread = new Thread(new Runnable() {
 				public void run(){
+					
+					//loop through input args to set checkboxes in UI
+					for(int i = 0; i < inputArg.size(); i++) {
+						switch (inputArg.get(i)){
+							case "best": 
+								bestFit.setDisable(true);
+								bestFit.setSelected(true);
+								break;
+							case "first": 
+								firstFit.setDisable(true);
+								firstFit.setSelected(true);
+								break;
+							case "next": 
+								nextFit.setDisable(true);
+								nextFit.setSelected(true);
+								break;
+							case "worst": 
+								worstFit.setDisable(true);
+								worstFit.setSelected(true);
+								break;
+						}
+					}
+					
 					//Simulation options
 					System.out.println("Running.................."+ inputArg.get(0));
 
@@ -281,82 +352,45 @@ public class UIStarter extends Application {
 					multsim.setSlotAlgorithms(inputArg);
 					
 					// leaving this one as "sim" in order to not change too much -pweems
-					MemorySimulator sim = multsim.getSim(0);
+					for(int i = 0; i < multsim.sims.length; i++) {
+						multUI[i].memSim = multsim.getSim(i);
+					}
 					
 					//run simulation
 					while(group.getSelectedToggle() != cont) {} //To Begin Simulation
 					while (group.getSelectedToggle() != shut) {
 						if(pauseSim.getSelectedToggle() != paused) {
 							multsim.timeStep();
-			    			sim.printMemory();			    			
-						}
-						ArrayList<Process> processes = sim.processes;
-		    			ArrayList<Process> remove = sim.processesDone;
-		    			int arraySize = processes.size();
-		    			String[] procNames = new String[arraySize];
-		    			int insertNames = 0;
-		    			for(Process p: processes) {
-		    				procNames[insertNames] = (String) "" + p.getPname();
-		    				insertNames++;
-		    			}
-		    			
-		    			procRun.getSelectionModel().selectedItemProperty().addListener(ov -> {
-		    				pcbBody.setText("Process #: " + procRun.getSelectionModel().getSelectedItem());
-		    				String[] selectedProc = getPcbInfo(procRun.getSelectionModel().getSelectedItem(), processes);
-		    				
-		    				pcbBody.setText(pcbBody.getText() + " \n" + " Time Added: \n" + selectedProc[1] + "\n");
-		    				pcbBody.setText(pcbBody.getText() + " \n" + " Size: \n" + selectedProc[2] + "\n");
-		    				pcbTail.setText(" \n" + " PID: \n" + selectedProc[3] + "\n");
-		    				try {
-		    				pcbTail.setText(pcbTail.getText() + " \n" + " Location: \n" + selectedProc[4] + "\n");
-		    				} catch (Exception e) {}
-		    			});
-		    			
-		    			
-		    			
-		    			//Function to update UI
-		    			Platform.runLater(new Runnable() {
-		    				//For each process in processes(Runnning processes including reserved memory, alter boxes in UI)
-							public void run(){
-								FlowPane memArea = (FlowPane) middleBox.getChildren().get(1);
-								for(Process n: processes) { 
-									for(int bounds = 0; bounds < n.getSize(); bounds++) {
-										StackPane targetPane = (StackPane) memArea.getChildren().get(n.getLocation()+bounds);
-										Rectangle nodeBg = (Rectangle) targetPane.getChildren().get(0);
-										nodeBg.setFill(Color.AZURE);
-										Label nodeMarker = (Label) targetPane.getChildren().get(1);
-										nodeMarker.setText(n.pname + "");
+			    			multsim.sims[0].printMemory();			    			
+						
+							for(int i = 0; i < multsim.sims.length; i++) {
+								obtainSimInfo(multUI[i], "prep");
+							}
+			    			
+			    			//Function to update UI
+			    			Platform.runLater(new Runnable() {
+			    				
+								public void run(){
+	
+									for(int i = 0; i < multsim.sims.length; i++) {
+										obtainSimInfo(multUI[i], "ui");
 									}
-									System.out.println(n.getPname() + " " + n.getSize() + " " + n.getLocation());
-								}
-								
-								//For each process in remove(processes pending removal, reset in UI)
-								for(Process n: remove) { 
 									
-									for(int bounds = 0; bounds < n.getSize(); bounds++) {
-										StackPane targetPane = (StackPane) memArea.getChildren().get(n.getLocation()+bounds);
-										Rectangle nodeBg = (Rectangle) targetPane.getChildren().get(0);
-										nodeBg.setFill(Color.GOLD);
-										Label nodeMarker = (Label) targetPane.getChildren().get(1);
-										nodeMarker.setText("~");
-									}
-									System.out.println(n.getPname() + " " + n.getSize());
-								}
-								
-								//Insert code to interact with UI - set items on window
-								procRun.setItems(FXCollections.observableArrayList(procNames));
-								statusInfo.setText("Status Info: ");
-								statusInfo.setText(statusInfo.getText() + " \n" + "Simulation Time Elapsed: " + sim.currentTime);
-								statusInfo.setText(statusInfo.getText() + " \n" + "Simulation Speed: " + simulationSpeed.getSimSpeed());
-							}					
-						});
-		    			try {
-		    				Thread.sleep((long)simulationSpeed.getSimSpeed());
-		    			} catch (InterruptedException e) {
-		    				
-		    			}
+									statusInfo.setText("Status Info: ");
+									statusInfo.setText(statusInfo.getText() + " \n" + "Simulation Time Elapsed: " + multsim.sims[0].currentTime);
+									statusInfo.setText(statusInfo.getText() + " \n" + "Simulation Speed: " + simulationSpeed.getSimSpeed());
+				
+								}					
+							});
+			    			try {
+			    				Thread.sleep((long)simulationSpeed.getSimSpeed());
+			    			} catch (InterruptedException e) {
+			    				
+			    			}
 		    			
-		    		}
+						}
+					
+					}
 					
 					
 				}			
@@ -369,9 +403,41 @@ public class UIStarter extends Application {
 		}
 	}
 	
-	//Utility function
+	//Utility function to obtain simulator info
+	public void obtainSimInfo(SimulatorUI myPane, String point) {
+		
+		MemorySimulator sim = myPane.memSim;
+		
+		if(point == "prep") {
+			
+			ArrayList<Process> processes = sim.processes;
+			ArrayList<Process> remove = sim.processesDone;
+			int arraySize = processes.size();
+			String[] procNames = new String[arraySize];
+			int insertNames = 0;
+			for(Process p: processes) {
+				procNames[insertNames] = (String) "" + p.getPname();
+				insertNames++;
+			}
+			
+			try {
+				myPane.messages.add("Removed Process " + remove.get(0).pname );
+			} catch(Exception e) {
+				myPane.messages.add("Added process " + processes.get(processes.size()-1).pname);
+			}
+		}
+		if(point == "ui") {
+			//Update Main UI components
+			updateUI(myPane.middleBox, sim.processes, sim.processesDone);
+
+			//Update Info individual to each simulator
+			myPane.updateSimInfo();
+		}
+	}
+	
+	//Utility function to retrieve PCB info
 	public String[] getPcbInfo(String procName, ArrayList<Process> processes) {
-		String [] procInfoGlob = new String[4];
+		String [] procInfoGlob = new String[5];
 		for(Process p : processes) {
 			String procNameMatch = "" + p.getPname(); 
 			if(procName != null) {
@@ -380,13 +446,25 @@ public class UIStarter extends Application {
 					int procPid = p.getPid();
 					int procTimeAdd = p.getTimeAdded();
 					int procLoc = p.getLocation();
-					int procTimeDel = procTimeAdd;
-					String[] procInfo = {procName, Integer.toString(procTimeAdd), Integer.toString(procSize), Integer.toString(procPid), Integer.toString(procLoc)};
+					int procTimeDel = p.durationLeft;
+					String[] procInfo = {procName, Integer.toString(procTimeAdd), Integer.toString(procSize), Integer.toString(procPid), 
+							Integer.toString(procLoc), Integer.toString(procTimeDel)};
 					return procInfo;
 				}
 			}
 		}
 		return procInfoGlob;
+	}
+	
+	//Display second simulator
+	public void viewSim(Pane otherSim) {
+		Pane simMasterPane = new Pane();
+		simMasterPane.getChildren().add(otherSim);
+		Scene scene = new Scene(simMasterPane, 650, 620);
+		Stage primaryStage = new Stage();
+		primaryStage.setTitle("Second Simulator: "); // Set the stage title
+		primaryStage.setScene(scene); // Place the scene in the stage
+		primaryStage.show(); // Display the stage
 	}
 	
 	//Utility function to perform analysis calculations and summarize results
@@ -400,13 +478,13 @@ public class UIStarter extends Application {
 	}
 	
 	public static void main(String[] args) {
-		//If no arguments passed, set default arguments
-		//Use arguments from command line to intialize ui corresponding fields
+		//Use arguments from command line to initialize UI corresponding fields
 		SimulationParameters simP = new SimulationParameters();
 		simP.input = args;
 		launch(args);
 	}
 	
+	//Simulation speed control
 	public class SimulSpeed {
 		double simSpeed = 1000;
 		
@@ -419,4 +497,29 @@ public class UIStarter extends Application {
 		}
 	}
 	
+	//For each process in processes(Running processes including reserved memory, alter boxes in UI)
+	public void updateUI(VBox middleBox, ArrayList<Process> processes, ArrayList<Process> remove) {
+		FlowPane memArea = (FlowPane) middleBox.getChildren().get(1);
+		for(Process n: processes) { 
+			for(int bounds = 0; bounds < n.getSize(); bounds++) {
+				StackPane targetPane = (StackPane) memArea.getChildren().get(n.getLocation()+bounds);
+				Rectangle nodeBg = (Rectangle) targetPane.getChildren().get(0);
+				nodeBg.setFill(Color.AZURE);
+				Label nodeMarker = (Label) targetPane.getChildren().get(1);
+				nodeMarker.setText(n.pname + "");
+			}
+			System.out.println(n.getPname() + " " + n.getSize() + " " + n.getLocation());
+		}
+		for(Process n: remove) { 
+			
+			for(int bounds = 0; bounds < n.getSize(); bounds++) {
+				StackPane targetPane = (StackPane) memArea.getChildren().get(n.getLocation()+bounds);
+				Rectangle nodeBg = (Rectangle) targetPane.getChildren().get(0);
+				nodeBg.setFill(Color.GOLD);
+				Label nodeMarker = (Label) targetPane.getChildren().get(1);
+				nodeMarker.setText("~");
+			}
+			System.out.println(n.getPname() + " " + n.getSize());
+		}
+	}
 }

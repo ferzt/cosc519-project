@@ -11,7 +11,7 @@ public class Process implements Comparable<Process> {
 	protected char pname;
 	private int size;
 	private int duration;
-	private int durationLeft;
+	public int durationLeft;
 	
 	private int timeAdded = -1;
 	private int memoryLocation = -1;

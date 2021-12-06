@@ -67,4 +67,8 @@ public class MultiSimulator {
 			simp.printMemory();
 		}
 	}
+	
+	public void updateUI() {
+		
+	}
 }
