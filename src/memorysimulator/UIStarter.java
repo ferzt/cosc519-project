@@ -53,8 +53,7 @@ public class UIStarter extends Application {
 		try {			
 			// Parameter list inputs
 			Parameters params = getParameters();
-			List<String> inputArg = params.getRaw();
-			String[] inputArgUi = new String[inputArg.size()];
+			List<String> inputArg = params.getRaw();//input arguments from command line
 			
 			//Initialize memory slots
 			SimulSpeed simulationSpeed = new SimulSpeed();
@@ -83,30 +82,64 @@ public class UIStarter extends Application {
 			controlsRightB.setPrefSize(325, 50);
 			
 			
-			// Panes or Containers for center components
+			// Pane to hold check boxes for input arguments
 			HBox inputArgs = new HBox();
-			inputArgs.setPrefSize(450, 200);
+			inputArgs.setPrefSize(320, 200);//set size
 			
 			
 			//Create Children Panes
 			BorderPane smallPane = new BorderPane(); //Container for right controls, slider and switch
 			VBox processGen = new VBox(); //container for process generation toggling equivalent to a pause
 			BorderPane btnSnap = new BorderPane();// Container for snapshot button - shows analysis at that point in time, make plot
+			BorderPane reset = new BorderPane(); // reset button for check boxes
 			btnSnap.setPrefSize(650,100);
+			reset.setPrefSize(150, 200);
+			smallPane.setPrefSize(170, 200);
 			
-			//Create buttons and components for simulation 
-			Button snapShot = new Button("VIEW SIMULATOR II"); // Get analytic snapshot for both running simulations
-			Button interrupt = new Button("Interrupt");
+			
+			//Container for each input check box
+			BorderPane firstCenterx = new BorderPane();
+			BorderPane worstCenterx = new BorderPane();
+			BorderPane nextCenterx = new BorderPane();
+			BorderPane bestCenterx = new BorderPane();
+			
+		
+			//Sizing check box container
+			firstCenterx.setPrefSize(80, 200);
+			worstCenterx.setPrefSize(80, 200);
+			bestCenterx.setPrefSize(80, 200);
+			nextCenterx.setPrefSize(80, 200);
+			
+			//Create buttons  
+			Button snapShot = new Button("VIEW RESULTS"); // Get analytic snapshot for both running simulations
+			Button interrupt = new Button("RESET");
+			snapShot.setMaxWidth(Double.MAX_VALUE);
+			interrupt.setMaxWidth(Double.MAX_VALUE);
+			
+			//Create Slider to manipulate time
 			Slider timeMultiplier = new Slider();
 			
+			//Toggle groups to control pause, stop
 			ToggleGroup group = new ToggleGroup();
 			ToggleGroup pauseSim = new ToggleGroup();
 			ToggleButton paused = new ToggleButton();
 			ToggleButton notPaused = new ToggleButton();
 			
+			paused.setToggleGroup(pauseSim);
+			notPaused.setToggleGroup(pauseSim);
+			notPaused.setSelected(true);
+			
+			//Radio Buttons for cont(-inuing) and shut(-ting) down simulation
 			RadioButton cont = new RadioButton("ON");
 			RadioButton shut = new RadioButton("OFF");
 			
+			//Set options
+			cont.setSelected(false);
+			shut.setSelected(true);
+			cont.setToggleGroup(group);
+			shut.setToggleGroup(group);
+			
+			//Check boxes for algorithm selection
 			CheckBox firstFit = new CheckBox("First Fit");
 			CheckBox bestFit = new CheckBox("Best Fit");
 			CheckBox worstFit = new CheckBox("Worst Fit");
@@ -114,7 +147,7 @@ public class UIStarter extends Application {
 			
 			TextArea statusInfo = new TextArea("Status Info:");
 			
-			//Set Padding for checkboxes
+			//Set Padding for check boxes
 			int checkBoxSize = 5;
 			firstFit.setPadding(new Insets(checkBoxSize,checkBoxSize,checkBoxSize,checkBoxSize));
 			bestFit.setPadding(new Insets(checkBoxSize,checkBoxSize,checkBoxSize,checkBoxSize));
@@ -127,25 +160,14 @@ public class UIStarter extends Application {
 			
 			Button startSim = new Button("START");
 			Button stopSim = new Button("STOP"); //Stop Button - becomes visible when start button is pressed
+			startSim.setMaxWidth(Double.MAX_VALUE);
+			stopSim.setMaxWidth(Double.MAX_VALUE);
 			
-			ListView<String> procRun = new ListView<String>(); //Listview to hold processes
+			ListView<String> procRun = new ListView<String>(); //List view to hold processes
 			
 			//Styling areas (besides memory slots - done above)
 			paneCenterComponents.setStyle("-fx-background-color:lightgray;");
 			paneBottomComponents.setStyle("-fx-background-color:darkgray;");
-			
-			//Set options and initialization for buttons and components
-			snapShot.setMaxWidth(Double.MAX_VALUE);
-			interrupt.setMaxWidth(Double.MAX_VALUE);
-			startSim.setMaxWidth(Double.MAX_VALUE);
-			stopSim.setMaxWidth(Double.MAX_VALUE);
-			cont.setSelected(false);
-			shut.setSelected(true);
-			cont.setToggleGroup(group);
-			shut.setToggleGroup(group);
-			paused.setToggleGroup(pauseSim);
-			notPaused.setToggleGroup(pauseSim);
-			notPaused.setSelected(true);
 			
 			//Color buttons
 			startSim.setStyle("-fx-background-color:#32de84;");
@@ -161,25 +183,25 @@ public class UIStarter extends Application {
 			btnSnap.setCenter(snapShot);
 			processGen.getChildren().addAll(cont,shut);
 			smallPane.setCenter(timeMultiplier);
-			inputArgs.getChildren().addAll(firstFit,bestFit, worstFit,nextFit);
-
+			reset.setCenter(interrupt);
+			firstCenterx.setCenter(firstFit);
+			bestCenterx.setCenter(bestFit);
+			worstCenterx.setCenter(worstFit);
+			nextCenterx.setCenter(nextFit);
+			inputArgs.getChildren().addAll(firstCenterx,bestCenterx, worstCenterx,nextCenterx);
 			
 			//Putting children panes into Parent Panes/containers
 			controlsLeftB.getChildren().add(startSim);
 			controlsRightB.getChildren().add(stopSim);
 			startStopButtons.getChildren().addAll(controlsLeftB,controlsRightB);
 			paneBottomComponents.getChildren().addAll(startStopButtons, statusInfo, btnSnap);
-			paneCenterComponents.getChildren().addAll(inputArgs, smallPane);
+			paneCenterComponents.getChildren().addAll(inputArgs, reset, smallPane);
 
-			SimulatorUI myPane = new SimulatorUI();
-			SimulatorUI secondSim = new SimulatorUI();
-			
-			SimulatorUI[] multUI = {myPane, secondSim};
-			
-			paneTopComponents.getChildren().addAll(myPane.mainComponent());
+
+			SimulatorUI[] multUI = new SimulatorUI[4]; //max of 4 can run at once
 			
 			//Master pane insertion
-			panemaster.getChildren().addAll(paneTopComponents, paneCenterComponents, paneBottomComponents);// Top and bottom components into panemaster
+			panemaster.getChildren().addAll(paneCenterComponents, paneBottomComponents);// Top and bottom components into panemaster
 			
 			//Start/Resume, Pause and Stop parameters
 			boolean start = false, pause=false, stop=false;
@@ -207,86 +229,43 @@ public class UIStarter extends Application {
 	        
 	        EventHandler<ActionEvent> checkBoxBestHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
-	            {	  
-    				if(!myPane.argSet && !secondSim.argSet) {
-    					myPane.argSet = true;
-    					myPane.runningAlgo = "best";
-    					bestFit.setDisable(true);
-    				} else {
-    				if(!myPane.argSet || !secondSim.argSet) {
-    					secondSim.argSet = true;
-    					secondSim.runningAlgo = "best";
-    					bestFit.setDisable(true);
-    					firstFit.setDisable(true);
-    					worstFit.setDisable(true);
-    					nextFit.setDisable(true);
-    				}
-    				}
-        			
+	            {	
+	        		int index = setMultUI(multUI, bestFit);
+	        		multUI[index].runningAlgo = "best";
+	        		Stage primStage = viewSim(multUI[index].mainComponent(), "BEST");
+	        		primStage.show();
 	            }
 	        };
 	        
 	        EventHandler<ActionEvent> checkBoxFirstHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {
-	        		if(!myPane.argSet && !secondSim.argSet) {
-    					myPane.argSet = true;
-    					myPane.runningAlgo = "first";
-    					firstFit.setDisable(true);
-    				} else {
-    				if(!myPane.argSet || !secondSim.argSet) {
-    					secondSim.argSet = true;
-    					secondSim.runningAlgo = "first";
-    					firstFit.setDisable(true);
-    					bestFit.setDisable(true);
-    					worstFit.setDisable(true);
-    					nextFit.setDisable(true);
-    				}
-    				}
+	        		int index = setMultUI(multUI, firstFit);
+	        		multUI[index].runningAlgo = "first";
+	        		Stage primStage = viewSim(multUI[index].mainComponent(), "FIRST");
+	        		primStage.show();
 	            }
 	        };
 	        
 	        EventHandler<ActionEvent> checkBoxWorstHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {      
-	        		if(!myPane.argSet && !secondSim.argSet) {
-    					myPane.argSet = true;
-    					myPane.runningAlgo = "worst";
-    					worstFit.setDisable(true);
-    				} else {
-    				if(!myPane.argSet || !secondSim.argSet) {
-    					secondSim.argSet = true;
-    					secondSim.runningAlgo = "worst";
-    					worstFit.setDisable(true);
-    					firstFit.setDisable(true);
-    					bestFit.setDisable(true);
-    					nextFit.setDisable(true);
-    				}
-    				}
+	        		int index = setMultUI(multUI, worstFit);
+	        		multUI[index].runningAlgo = "worst";
+	        		Stage primStage = viewSim(multUI[index].mainComponent(), "WORST");
+	        		primStage.show();
 	            }
 	        };
 	        
 	        EventHandler<ActionEvent> checkBoxNextHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {
-	        		if(!myPane.argSet && !secondSim.argSet) {
-    					myPane.argSet = true;
-    					myPane.runningAlgo = "next";
-    					nextFit.setDisable(true);
-    				} else {
-    				if(!myPane.argSet || !secondSim.argSet) {
-    					secondSim.argSet = true;
-    					secondSim.runningAlgo = "next";
-    					nextFit.setDisable(true);
-    					firstFit.setDisable(true);
-    					worstFit.setDisable(true);
-    					bestFit.setDisable(true);
-    				}
-    				}
+	        		int index = setMultUI(multUI, nextFit);
+	        		multUI[index].runningAlgo = "next";
+	        		Stage primStage = viewSim(multUI[index].mainComponent(), "NEXT");
+	        		primStage.show();
 	            }
 	        };
-	        
-	        snapShot.setOnAction(e -> viewSim(secondSim.mainComponent()));
 	        
 	        timeMultiplier.valueProperty().addListener(ov -> {
 		        simulationSpeed.setSimSpeed(timeMultiplier.getValue() * 2000 / timeMultiplier.getMax());
@@ -306,12 +285,8 @@ public class UIStarter extends Application {
 			nextFit.setOnAction(checkBoxNextHandler);
 			firstFit.setOnAction(checkBoxFirstHandler);
 			
-			//Start out with buttons greyed out
-//						startSim.setDisable(true);
-//						stopSim.setDisable(true);
-			
 			//Create scene and place on stage
-			Scene scene = new Scene(panemaster,650,800);
+			Scene scene = new Scene(panemaster,650,200);
 
 			primaryStage.setTitle("Memory Simulator COSC 519 - GROUP 3"); // Set the stage title
 			primaryStage.setScene(scene); // Place the scene in the stage
@@ -320,44 +295,33 @@ public class UIStarter extends Application {
 			//Create Thread to run simulation
 			Thread simThread = new Thread(new Runnable() {
 				public void run(){
+
+					//Simulation options
+					System.out.println("Running..................");
+
+					//run simulation
+					while(group.getSelectedToggle() != cont) {} //To Begin Simulation
 					
-					//loop through input args to set checkboxes in UI
-					for(int i = 0; i < inputArg.size(); i++) {
-						switch (inputArg.get(i)){
-							case "best": 
-								bestFit.setDisable(true);
-								bestFit.setSelected(true);
-								break;
-							case "first": 
-								firstFit.setDisable(true);
-								firstFit.setSelected(true);
-								break;
-							case "next": 
-								nextFit.setDisable(true);
-								nextFit.setSelected(true);
-								break;
-							case "worst": 
-								worstFit.setDisable(true);
-								worstFit.setSelected(true);
-								break;
+					int numOfSims = 0;
+					
+					for(int i = 0; i < multUI.length; i++) {
+						if(multUI[i] != null) {
+							numOfSims++;
 						}
 					}
 					
-					//Simulation options
-					System.out.println("Running.................."+ inputArg.get(0));
-
+					System.out.println(numOfSims);
 					//set simulation
-					
-					MultiSimulator multsim = new MultiSimulator(inputArg.size());
-					multsim.setSlotAlgorithms(inputArg);
+					MultiSimulator multsim = new MultiSimulator(numOfSims);
 					
 					// leaving this one as "sim" in order to not change too much -pweems
 					for(int i = 0; i < multsim.sims.length; i++) {
+						System.out.println(multUI[i].runningAlgo);
+						multsim.getSim(i).setSlotAlgorithm(multUI[i].runningAlgo);
 						multUI[i].memSim = multsim.getSim(i);
 					}
 					
-					//run simulation
-					while(group.getSelectedToggle() != cont) {} //To Begin Simulation
+					
 					while (group.getSelectedToggle() != shut) {
 						if(pauseSim.getSelectedToggle() != paused) {
 							multsim.timeStep();
@@ -436,35 +400,38 @@ public class UIStarter extends Application {
 	}
 	
 	//Utility function to retrieve PCB info
-	public String[] getPcbInfo(String procName, ArrayList<Process> processes) {
-		String [] procInfoGlob = new String[5];
-		for(Process p : processes) {
-			String procNameMatch = "" + p.getPname(); 
-			if(procName != null) {
-				if(procName.equals(procNameMatch)) {
-					int procSize = p.getSize();
-					int procPid = p.getPid();
-					int procTimeAdd = p.getTimeAdded();
-					int procLoc = p.getLocation();
-					int procTimeDel = p.durationLeft;
-					String[] procInfo = {procName, Integer.toString(procTimeAdd), Integer.toString(procSize), Integer.toString(procPid), 
-							Integer.toString(procLoc), Integer.toString(procTimeDel)};
-					return procInfo;
-				}
+	public int setMultUI(SimulatorUI[] multUI, CheckBox btn) {
+		
+		int index = -1;
+		
+		for(int i = 0; i < multUI.length; i++) {
+
+			index++;
+			if(multUI[i] == null) {
+				multUI[i] = new SimulatorUI();
+				break;
 			}
 		}
-		return procInfoGlob;
+		
+
+		//loop through input args to set checkboxes in UI
+		btn.setDisable(true);
+		btn.setSelected(true);
+		
+		return index;
+		
 	}
 	
 	//Display second simulator
-	public void viewSim(Pane otherSim) {
+	public Stage viewSim(Pane otherSim, String algo) {
 		Pane simMasterPane = new Pane();
 		simMasterPane.getChildren().add(otherSim);
 		Scene scene = new Scene(simMasterPane, 650, 620);
 		Stage primaryStage = new Stage();
-		primaryStage.setTitle("Second Simulator: "); // Set the stage title
+		primaryStage.setTitle("Simulator: " + algo); // Set the stage title
 		primaryStage.setScene(scene); // Place the scene in the stage
-		primaryStage.show(); // Display the stage
+
+		return primaryStage;
 	}
 	
 	//Utility function to perform analysis calculations and summarize results
@@ -474,7 +441,6 @@ public class UIStarter extends Application {
 		Stage primaryStage = new Stage();
 		primaryStage.setTitle("Current State"); // Set the stage title
 		primaryStage.setScene(scene); // Place the scene in the stage
-		primaryStage.show(); // Display the stage
 	}
 	
 	public static void main(String[] args) {

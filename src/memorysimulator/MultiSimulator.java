@@ -68,7 +68,4 @@ public class MultiSimulator {
 		}
 	}
 	
-	public void updateUI() {
-		
-	}
 }
