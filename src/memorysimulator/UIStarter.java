@@ -111,8 +111,8 @@ public class UIStarter extends Application {
 			nextCenterx.setPrefSize(80, 200);
 			
 			//Create buttons  
-			Button snapShot = new Button("VIEW RESULTS"); // Get analytic snapshot for both running simulations
-			Button interrupt = new Button("RESET");
+			Button snapShot = new Button("TERMINATE PROGRAM"); // Terminate Program
+			Button interrupt = new Button("RESET");//Button to reset check boxes
 			snapShot.setMaxWidth(Double.MAX_VALUE);
 			interrupt.setMaxWidth(Double.MAX_VALUE);
 			
@@ -199,6 +199,7 @@ public class UIStarter extends Application {
 
 
 			SimulatorUI[] multUI = new SimulatorUI[4]; //max of 4 can run at once
+			Stage[] allStages = new Stage[4];
 			
 			//Master pane insertion
 			panemaster.getChildren().addAll(paneCenterComponents, paneBottomComponents);// Top and bottom components into panemaster
@@ -230,42 +231,39 @@ public class UIStarter extends Application {
 	        EventHandler<ActionEvent> checkBoxBestHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {	
-	        		int index = setMultUI(multUI, bestFit);
-	        		multUI[index].runningAlgo = "best";
-	        		Stage primStage = viewSim(multUI[index].mainComponent(), "BEST");
-	        		primStage.show();
+	        		int index = setMultUI(multUI, allStages, bestFit);
+	        		allStages[index].show();
 	            }
 	        };
 	        
 	        EventHandler<ActionEvent> checkBoxFirstHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {
-	        		int index = setMultUI(multUI, firstFit);
-	        		multUI[index].runningAlgo = "first";
-	        		Stage primStage = viewSim(multUI[index].mainComponent(), "FIRST");
-	        		primStage.show();
+	        		int index = setMultUI(multUI, allStages, firstFit);
+	        		allStages[index].show();
 	            }
 	        };
 	        
 	        EventHandler<ActionEvent> checkBoxWorstHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {      
-	        		int index = setMultUI(multUI, worstFit);
-	        		multUI[index].runningAlgo = "worst";
-	        		Stage primStage = viewSim(multUI[index].mainComponent(), "WORST");
-	        		primStage.show();
+	        		int index = setMultUI(multUI, allStages, worstFit);
+	        		allStages[index].show();
 	            }
 	        };
 	        
 	        EventHandler<ActionEvent> checkBoxNextHandler = new EventHandler<ActionEvent>() {
 	        	public void handle(ActionEvent e)
 	            {
-	        		int index = setMultUI(multUI, nextFit);
-	        		multUI[index].runningAlgo = "next";
-	        		Stage primStage = viewSim(multUI[index].mainComponent(), "NEXT");
-	        		primStage.show();
+	        		int index = setMultUI(multUI, allStages, nextFit);
+	        		allStages[index].show();
 	            }
 	        };
+	        
+	        interrupt.setOnAction(e -> {
+	        	CheckBox[] allBoxes = {bestFit, worstFit, nextFit, firstFit};
+	        	reset(allStages, multUI, allBoxes);
+	        });
 	        
 	        timeMultiplier.valueProperty().addListener(ov -> {
 		        simulationSpeed.setSimSpeed(timeMultiplier.getValue() * 2000 / timeMultiplier.getMax());
@@ -284,6 +282,13 @@ public class UIStarter extends Application {
 			worstFit.setOnAction(checkBoxWorstHandler);
 			nextFit.setOnAction(checkBoxNextHandler);
 			firstFit.setOnAction(checkBoxFirstHandler);
+			
+			//termination call
+			snapShot.setOnAction(e -> {
+				CheckBox[] allBoxes = {bestFit, worstFit, nextFit, firstFit};
+				reset(allStages, multUI, allBoxes);
+				terminate(primaryStage);
+			});
 			
 			//Create scene and place on stage
 			Scene scene = new Scene(panemaster,650,200);
@@ -400,7 +405,7 @@ public class UIStarter extends Application {
 	}
 	
 	//Utility function to retrieve PCB info
-	public int setMultUI(SimulatorUI[] multUI, CheckBox btn) {
+	public int setMultUI(SimulatorUI[] multUI, Stage[] allStages, CheckBox btn) {
 		
 		int index = -1;
 		
@@ -413,6 +418,15 @@ public class UIStarter extends Application {
 			}
 		}
 		
+		String algo = btn.getText().toLowerCase();
+		int spaceLoc = algo.indexOf(" ");
+		algo = algo.substring(0, spaceLoc);
+		
+		multUI[index].runningAlgo = algo;
+		
+		Stage primStage = viewSim(multUI[index].mainComponent(), btn.getText());
+		
+		allStages[index] = primStage;
 
 		//loop through input args to set checkboxes in UI
 		btn.setDisable(true);
@@ -434,13 +448,21 @@ public class UIStarter extends Application {
 		return primaryStage;
 	}
 	
-	//Utility function to perform analysis calculations and summarize results
-	public void result() {
-		Button btnTest = new Button("Snapshot");
-		Scene scene = new Scene(btnTest, 500, 500);
-		Stage primaryStage = new Stage();
-		primaryStage.setTitle("Current State"); // Set the stage title
-		primaryStage.setScene(scene); // Place the scene in the stage
+	//Utility function to reset check boxes
+	public void reset(Stage allStages[], SimulatorUI allSims[], CheckBox[] options) {
+		
+		for(int i = 0; i < allStages.length; i++) {
+			if(allStages[i] != null) {
+				allStages[i].close();
+				allStages[i] = null;
+				allSims[i] = null;
+			}
+		}
+		
+		for(int i = 0; i < options.length; i++) {
+			options[i].setDisable(false);
+			options[i].setSelected(false);
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -487,5 +509,10 @@ public class UIStarter extends Application {
 			}
 			System.out.println(n.getPname() + " " + n.getSize());
 		}
+	}
+	
+	//terminate program
+	public void terminate(Stage boss) {
+		boss.close();
 	}
 }
