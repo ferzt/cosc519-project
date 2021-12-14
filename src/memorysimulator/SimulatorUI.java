@@ -164,6 +164,7 @@ public class SimulatorUI {
 			pcbTail.setText(pcbTail.getText() + "   " + " Extinct: " + selectedProc[5] + "  ");
 		} catch (Exception e) {}
 		diskQueue.setText("Waiting: " + memSim.howManyWaiting());
+		diskQueue.setText(diskQueue.getText()+ "\n" + "total wait: " + memSim.cumulativeStarvation);
 	}
 	
 	//Utility function for obtaining PCB information
