@@ -292,7 +292,8 @@ public class UIStarter extends Application {
 			
 			//Create scene and place on stage
 			Scene scene = new Scene(panemaster,650,200);
-
+			primaryStage.setX(800);
+			primaryStage.setY(600);
 			primaryStage.setTitle("Memory Simulator COSC 519 - GROUP 3"); // Set the stage title
 			primaryStage.setScene(scene); // Place the scene in the stage
 			primaryStage.show(); // Display the stage
@@ -425,6 +426,11 @@ public class UIStarter extends Application {
 		multUI[index].runningAlgo = algo;
 		
 		Stage primStage = viewSim(multUI[index].mainComponent(), btn.getText());
+		
+		int setPos = 650;
+		
+		primStage.setX(setPos*index);
+		primStage.setY(index);
 		
 		allStages[index] = primStage;
 

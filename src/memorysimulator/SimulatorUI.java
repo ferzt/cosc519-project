@@ -50,6 +50,7 @@ public class SimulatorUI {
 	
 	public Label pcbBody = new Label("Time Size");
 	public Label pcbTail = new Label(" Address");
+	public Label diskQueue = new Label("On Disk");
 	
 	public TextArea statusInfo = new TextArea("Status Info:");
 	
@@ -67,8 +68,9 @@ public class SimulatorUI {
 		//center box and left box dimensions
 		int centX = 500;
 		int centY = 500;
-		int pcbX = centX;
+		int pcbX = 400;
 		int pcbY = 200;
+		int diskX = centX-pcbX;
 		
 		//memory slot count 
 		int memslots = 0;
@@ -78,7 +80,13 @@ public class SimulatorUI {
 		paneTopComponents.setPrefSize(simX,simY); ///sizing
 		
 		HBox pcbBox = new HBox();
-		pcbBox.setPrefSize(pcbX, pcbY);
+		pcbBox.setPrefSize(centX-diskX, pcbY);
+		
+		HBox queueLabel = new HBox();
+		queueLabel.setPrefWidth(centX);
+		
+		HBox qtyBox = new HBox();
+		qtyBox.setPrefSize(centX, pcbY);
 		
 		//Panes in top component
 		VBox leftBox = new VBox(); //Queued Processes
@@ -97,9 +105,10 @@ public class SimulatorUI {
 		Font fontBold = Font.font("Georgia", FontWeight.BOLD, FontPosture.REGULAR, 18);
 		
 		Label pcbInfo = new Label("PCB");
+		Label diskInfo = new Label("DISK");
 		pcbInfo.setFont(fontBold);
-		
-		
+		pcbInfo.setPrefWidth(400);
+		diskInfo.setFont(fontBold);
 		
 		Label memLabel = new Label("MEMORY"); //Label for memory area
 		memLabel.setFont(fontBold);
@@ -123,11 +132,13 @@ public class SimulatorUI {
 		}
 		
 		systatus.getChildren().add(statusInfo);
+		queueLabel.getChildren().addAll(pcbInfo, diskInfo);
 		pcbBox.getChildren().addAll(pcbBody, pcbTail);
+		qtyBox.getChildren().addAll(pcbBox, diskQueue);
 		
 		//Putting children panes into Parent Panes/containers
 		leftBox.getChildren().addAll(procQueueLabel, new ScrollPane(procRun), systatus); //Queue and status information
-		middleBox.getChildren().addAll(memLabel,centerBox,pcbInfo,pcbBox); //memory and PCB information
+		middleBox.getChildren().addAll(memLabel,centerBox,queueLabel,qtyBox); //memory and PCB information
 		paneTopComponents.getChildren().addAll(leftBox, middleBox);//Left middle and right components into top
 		
 		return paneTopComponents;
@@ -152,6 +163,7 @@ public class SimulatorUI {
 			pcbTail.setText(pcbTail.getText() + "   " + " Location: " + selectedProc[4] + "  ");
 			pcbTail.setText(pcbTail.getText() + "   " + " Extinct: " + selectedProc[5] + "  ");
 		} catch (Exception e) {}
+		diskQueue.setText("Waiting: " + memSim.howManyWaiting());
 	}
 	
 	//Utility function for obtaining PCB information

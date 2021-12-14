@@ -132,7 +132,9 @@ public class MemorySimulator {
 	protected void addQueuedProcesses() {
 		boolean got = true;
 		while (!diskQueue.isEmpty() && got) {
-			got = putInMemory(diskQueue.remove(0));
+			got = putInMemory(diskQueue.get(0));
+			if (got)
+				diskQueue.remove(0);
 		}
 		/*Process p;
 		if (starved != null)
@@ -150,12 +152,14 @@ public class MemorySimulator {
 	protected boolean putInMemory(Process p) {
 		int targetSlot = slotAlgorithm.getNextSlot(p.getSize());
 		if (targetSlot == -1) {//no appropriate space found
+			return false;
+			/* we're not doing that defragmenting stuff anymore
 			defragment();
 			printMemory();
 			targetSlot = slotAlgorithm.getNextSlot(p.getSize());
 			if (targetSlot == -1) {//even after defragmenting, there is simply not enough space
 				return false;
-			}
+			}*/
 		}
 		//debugPrintln("Got a target slot of " + targetSlot + " for pid " + p.getPid());
 		putInMemoryAt(p, targetSlot);
@@ -188,7 +192,10 @@ public class MemorySimulator {
 	 * Print the current contents of memory
 	 */
 	public void printMemory() {
-		System.out.print("Memory at time " + currentTime + ":");
+		System.out.print(algorithmName+" albolizzem at time " + currentTime + ":");
+		if (howManyWaiting() > 0) {
+			System.out.print(" (" + howManyWaiting() + " waiting)");
+		}
 		
 		for (int i = 0; i < mainMemory.length; i++) {
 			if (i % 80 == 0) {
@@ -241,5 +248,13 @@ public class MemorySimulator {
 	
 	public ArrayList<Process> getProcesses() {
 		return processes;
+	}
+	
+	/**
+	 * 
+	 * @return The number of processes currently waiting on the disk due to lack of an available slot.
+	 */
+	public int howManyWaiting() {
+		return diskQueue.size();
 	}
 }
