@@ -36,6 +36,8 @@ public class MemorySimulator {
 	// must leave MEMSIM_DEBUG to true
 	protected static final boolean MEMSIM_DEBUG = true;
 	
+	public long cumulativeStarvation = 0;
+	
 	//private int timeAdded;
 	
 	public SlotAlgorithmBase slotAlgorithm;
@@ -78,6 +80,8 @@ public class MemorySimulator {
 		workOnProcesses();
 		
 		removeDoneProcesses();
+		
+		cumulativeStarvation += diskQueue.size();
 		
 		//addNextProcess();
 		
@@ -204,6 +208,7 @@ public class MemorySimulator {
 			System.out.print((mainMemory[i] == null ? '.' : mainMemory[i].getPname()) + "");
 		}
 		System.out.println("");
+		System.out.println("Cumulative starvation: "+cumulativeStarvation);
 	}
 	
 	/**
