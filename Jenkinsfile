@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('1') {
             steps {
-                bat 'exit 1'
+                bat 'exit 0'
             }
         }
         stage('2') {
