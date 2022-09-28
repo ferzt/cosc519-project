@@ -2,30 +2,21 @@ pipeline {
     agent any
 
     stages {
-        stage ('Compile Stage') {
-
+        stage('1') {
             steps {
-                withMaven(maven : 'maven_3_5_0') {
-                    sh 'mvn clean compile'
+                sh 'exit 0'
+            }
+        }
+        stage('2') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh "exit 1"
                 }
             }
         }
-
-        stage ('Testing Stage') {
-
+        stage('3') {
             steps {
-                withMaven(maven : 'maven_3_5_0') {
-                    sh 'mvn test'
-                }
-            }
-        }
-
-
-        stage ('Deployment Stage') {
-            steps {
-                withMaven(maven : 'maven_3_5_0') {
-                    sh 'mvn deploy'
-                }
+                sh 'exit 0'
             }
         }
     }
